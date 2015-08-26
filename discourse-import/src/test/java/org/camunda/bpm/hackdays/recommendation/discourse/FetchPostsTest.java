@@ -18,7 +18,7 @@ public class FetchPostsTest {
     while (documentsIt.hasNext()) {
       SolrInputDocument document = documentsIt.next();
       Assert.assertTrue(document.getField("text").getValue() instanceof String);
-      System.out.println(document.getField("title"));
+      System.out.println(document.getField("link"));
     }
   }
 }

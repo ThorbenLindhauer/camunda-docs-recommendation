@@ -34,52 +34,79 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
   }
 
   public Iterator<SolrInputDocument> documentsIt() {
-    CloseableHttpClient client = HttpClients.createDefault();
-    
-    HttpHost host = new HttpHost(properties.getProperty(DISCOURSE_HOST));
-    
-    final DiscoursePostFetcher fetcher = 
-        new DiscoursePostFetcher(
-            client, 
-            host, 
-            properties.getProperty(DISCOURSE_API_KEY), 
-            properties.getProperty(DISCOURSE_CATEGORY), 
-            Integer.parseInt(properties.getProperty(SEQUENCE_NUMBER)));
-    
-    return new Iterator<SolrInputDocument>() {
-      Iterator<DiscourseThread> threadIt = fetcher.threads();
-
-      public boolean hasNext() {
-        return threadIt.hasNext();
-      }
-
-      public SolrInputDocument next() {
-        DiscourseThread nextThread = threadIt.next();
-        
-        SolrInputDocument document = new SolrInputDocument();
-        document.addField("id", nextThread.getId());
-        document.addField("link", "http://" + properties.getProperty(DISCOURSE_HOST) + "/" + nextThread.getRelativeLink());
-        document.addField("text", concatenatePosts(nextThread));
-        document.addField("title", nextThread.getTitle());
-        
-        return document;
-      }
-
-      public void remove() {
-        threadIt.remove();
-      }
-    };
+    return new DiscourseSolrDocumentIterator(properties);
   }
   
-  protected String concatenatePosts(DiscourseThread thread) {
-    StringBuilder sb = new StringBuilder();
+  public static class DiscourseSolrDocumentIterator implements Iterator<SolrInputDocument> {
     
-    for (DiscoursePost post : thread.getPosts()) {
-      sb.append(post.getTextContent());
+    protected DiscoursePostFetcher fetcher;
+    protected Properties properties;
+    protected SolrInputDocument nextDocument;
+    protected Iterator<DiscourseThread> threadIt;
+    
+    public DiscourseSolrDocumentIterator(Properties properties) {
+      CloseableHttpClient client = HttpClients.createDefault();
+      
+      HttpHost host = new HttpHost(properties.getProperty(DISCOURSE_HOST));
+      
+      this.fetcher = 
+          new DiscoursePostFetcher(
+              client, 
+              host, 
+              properties.getProperty(DISCOURSE_API_KEY), 
+              properties.getProperty(DISCOURSE_CATEGORY), 
+              Integer.parseInt(properties.getProperty(SEQUENCE_NUMBER)));
+      this.threadIt = fetcher.threads();
+      this.properties = properties;
+      
+      move();
     }
     
-    return sb.toString();
+    
+    public boolean hasNext() {
+      return nextDocument != null;
+    }
+
+    public SolrInputDocument next() {
+      SolrInputDocument returnDocument = nextDocument;
+      move();
+      return returnDocument;
+    }
+
+    public void remove() {
+      threadIt.remove();
+    }
+    
+    protected void move() {
+      DiscourseThread nextThread = threadIt.next();
+      
+      while (nextThread.isDeleted() && threadIt.hasNext()) {
+        nextThread = threadIt.next();
+      }
+      
+      if (!nextThread.isDeleted()) {
+        nextDocument = new SolrInputDocument();
+        nextDocument.addField("id", nextThread.getId());
+        nextDocument.addField("link", "http://" + properties.getProperty(DISCOURSE_HOST) + "/" + nextThread.getRelativeLink());
+        nextDocument.addField("text", concatenatePosts(nextThread));
+        nextDocument.addField("title", nextThread.getTitle());
+      }
+      else {
+        nextDocument = null;
+      }
+    }
+    
+    protected String concatenatePosts(DiscourseThread thread) {
+      StringBuilder sb = new StringBuilder();
+      
+      for (DiscoursePost post : thread.getPosts()) {
+        sb.append(post.getTextContent());
+      }
+      
+      return sb.toString();
+    }
   }
+  
   
   protected Properties loadProperties() {
     Properties properties = new Properties();

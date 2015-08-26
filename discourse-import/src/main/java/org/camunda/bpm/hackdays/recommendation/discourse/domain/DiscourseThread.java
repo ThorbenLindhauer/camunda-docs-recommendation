@@ -8,6 +8,7 @@ public class DiscourseThread {
   protected int id;
   protected String slug;
   protected String title;
+  protected boolean deleted;
   
   public List<DiscoursePost> getPosts() {
     return posts;
@@ -19,6 +20,10 @@ public class DiscourseThread {
   
   public String getRelativeLink() {
     return "t/" + slug + "/" + id;
+  }
+  
+  public void setSlug(String slug) {
+    this.slug = slug;
   }
   
   public int getId() {
@@ -35,5 +40,13 @@ public class DiscourseThread {
 
   public void setTitle(String title) {
     this.title = title;
+  }
+  
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
+  }
+  
+  public boolean isDeleted() {
+    return deleted;
   }
 }
