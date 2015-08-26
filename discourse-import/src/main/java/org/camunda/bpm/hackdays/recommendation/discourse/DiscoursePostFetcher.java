@@ -30,14 +30,17 @@ public class DiscoursePostFetcher {
   protected HttpHost host;
   protected String apiKey;
   protected String category;
-  protected int maxSequence;
+  protected int sequenceStart;
+  protected int sequenceEnd;
 
-  public DiscoursePostFetcher(HttpClient client, HttpHost host, String apiKey, String category, int sequence) {
+  public DiscoursePostFetcher(HttpClient client, HttpHost host, 
+      String apiKey, String category, int sequenceStart, int sequenceEnd) {
     this.client = client;
     this.host = host;
     this.apiKey = apiKey;
     this.category = category;
-    this.maxSequence = sequence;
+    this.sequenceStart = sequenceStart;
+    this.sequenceEnd = sequenceEnd;
   }
   
   public Iterator<DiscourseThread> threads() {
@@ -46,7 +49,7 @@ public class DiscoursePostFetcher {
   
   public class ThreadIterator implements Iterator<DiscourseThread> {
     
-    protected int currentSequence = 0;
+    protected int currentSequence = sequenceStart - 1;
     
     protected DiscourseThread currentThread = null;
     
@@ -55,7 +58,7 @@ public class DiscoursePostFetcher {
     }
     
     public boolean hasNext() {
-      return currentSequence < maxSequence;
+      return currentSequence < sequenceEnd;
     }
 
     public DiscourseThread next() {
@@ -70,7 +73,7 @@ public class DiscoursePostFetcher {
     
     protected void move() {
       boolean threadLoaded = false;
-      while (!threadLoaded && currentSequence < maxSequence) {
+      while (!threadLoaded && currentSequence < sequenceEnd) {
         try {
           currentSequence++;
           LOG.info("loading document with sequence id " + currentSequence);

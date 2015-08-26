@@ -7,7 +7,7 @@ import java.util.Properties;
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.solr.common.SolrInputDocument;
+import org.camunda.bpm.hackdays.recommendation.CamundaDocument;
 import org.camunda.bpm.hackdays.recommendation.SolrDocumentSource;
 import org.camunda.bpm.hackdays.recommendation.discourse.domain.DiscoursePost;
 import org.camunda.bpm.hackdays.recommendation.discourse.domain.DiscourseThread;
@@ -16,12 +16,12 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
 
   public static final String PROPERTIES_FILE = "discourse.properties";
   
-  // TODO Make configurable
   public static final String DISCOURSE_HOST = "host";
   public static final String DISCOURSE_CATEGORY = "category";
   public static final String DISCOURSE_API_KEY = "api-key";
   
-  public static final String SEQUENCE_NUMBER = "sequence";
+  public static final String SEQUENCE_START_NUMBER = "sequence-start";
+  public static final String SEQUENCE_END_NUMBER = "sequence-end";
   
   protected Properties properties;
 
@@ -33,15 +33,15 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
     return "discourse";
   }
 
-  public Iterator<SolrInputDocument> documentsIt() {
+  public Iterator<CamundaDocument> documentsIt() {
     return new DiscourseSolrDocumentIterator(properties);
   }
   
-  public static class DiscourseSolrDocumentIterator implements Iterator<SolrInputDocument> {
+  public static class DiscourseSolrDocumentIterator implements Iterator<CamundaDocument> {
     
     protected DiscoursePostFetcher fetcher;
     protected Properties properties;
-    protected SolrInputDocument nextDocument;
+    protected CamundaDocument nextDocument;
     protected Iterator<DiscourseThread> threadIt;
     
     public DiscourseSolrDocumentIterator(Properties properties) {
@@ -54,8 +54,9 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
               client, 
               host, 
               properties.getProperty(DISCOURSE_API_KEY), 
-              properties.getProperty(DISCOURSE_CATEGORY), 
-              Integer.parseInt(properties.getProperty(SEQUENCE_NUMBER)));
+              properties.getProperty(DISCOURSE_CATEGORY),
+              Integer.parseInt(properties.getProperty(SEQUENCE_START_NUMBER)),
+              Integer.parseInt(properties.getProperty(SEQUENCE_END_NUMBER)));
       this.threadIt = fetcher.threads();
       this.properties = properties;
       
@@ -67,8 +68,8 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
       return nextDocument != null;
     }
 
-    public SolrInputDocument next() {
-      SolrInputDocument returnDocument = nextDocument;
+    public CamundaDocument next() {
+      CamundaDocument returnDocument = nextDocument;
       move();
       return returnDocument;
     }
@@ -85,11 +86,7 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
       }
       
       if (!nextThread.isDeleted()) {
-        nextDocument = new SolrInputDocument();
-        nextDocument.addField("id", nextThread.getId());
-        nextDocument.addField("link", "http://" + properties.getProperty(DISCOURSE_HOST) + "/" + nextThread.getRelativeLink());
-        nextDocument.addField("text", concatenatePosts(nextThread));
-        nextDocument.addField("title", nextThread.getTitle());
+        nextDocument = new DiscourseDocument(properties.getProperty(DISCOURSE_HOST), nextThread);
       }
       else {
         nextDocument = null;
