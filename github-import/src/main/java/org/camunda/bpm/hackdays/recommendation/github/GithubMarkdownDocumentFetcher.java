@@ -19,6 +19,7 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.eclipse.jgit.api.Git;
+import org.jsoup.Jsoup;
 import org.pegdown.PegDownProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,8 @@ public class GithubMarkdownDocumentFetcher {
     public MarkdownDocumentIterator() {
       RepositoryService repositoryService = new RepositoryService(client);
       try {
-        
+
+        LOG.info("Processing repository " + repositoryOwner + "/" + repositoryName);
         this.repository = repositoryService.getRepository(repositoryOwner, repositoryName);
         
         // clone repository
@@ -132,9 +134,10 @@ public class GithubMarkdownDocumentFetcher {
       String title = treeEntry.getPath();
       PegDownProcessor markdownProcessor = new PegDownProcessor();
       String htmlContent = markdownProcessor.markdownToHtml(content);
+      String cleanContent = Jsoup.parse(htmlContent).text();
       
       GithubMarkdownDocument document = new GithubMarkdownDocument();
-      document.setContent(htmlContent);
+      document.setContent(cleanContent);
       document.setTitle(title);
       document.setLink(link);
       

@@ -18,6 +18,7 @@ import org.camunda.bpm.hackdays.recommendation.discourse.domain.DiscoursePost;
 import org.camunda.bpm.hackdays.recommendation.discourse.domain.DiscourseThread;
 import org.camunda.spin.SpinList;
 import org.camunda.spin.json.SpinJsonNode;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +110,8 @@ public class DiscoursePostFetcher {
     for (SpinJsonNode post : posts) {
       String postContent = post.prop("cooked").stringValue();
       DiscoursePost discoursePost = new DiscoursePost();
-      discoursePost.setTextContent(postContent);
+      String cleanContent = Jsoup.parse(postContent).text();
+      discoursePost.setTextContent(cleanContent);
       discoursePosts.add(discoursePost);
     }
     

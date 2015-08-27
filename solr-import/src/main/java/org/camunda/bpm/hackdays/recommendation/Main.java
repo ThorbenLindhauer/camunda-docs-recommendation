@@ -79,7 +79,7 @@ public class Main {
       }
     }
   }
-  
+
   protected static void listDocuments() {
     ServiceLoader<SolrDocumentSource> documentSources = ServiceLoader.load(SolrDocumentSource.class);
     
