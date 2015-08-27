@@ -28,6 +28,10 @@ public class DiscourseDocument implements CamundaSourceDocument {
     return thread.getTitle();
   }
   
+  public String getType() {
+    return "Forum Discussion";
+  }
+  
   protected String concatenatePosts(DiscourseThread thread) {
     StringBuilder sb = new StringBuilder();
     

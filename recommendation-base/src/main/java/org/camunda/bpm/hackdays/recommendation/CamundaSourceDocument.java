@@ -8,4 +8,6 @@ public interface CamundaSourceDocument {
   
   String getTitle();
   
+  String getType();
+  
 }

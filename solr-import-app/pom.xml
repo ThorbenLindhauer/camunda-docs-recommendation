@@ -19,6 +19,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.camunda.bpm.hackdays.recommendation</groupId>
+			<artifactId>github-import</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.2</version>
@@ -38,7 +44,7 @@
 				<artifactId>appassembler-maven-plugin</artifactId>
 				<version>1.10</version>
 				<configuration>
-					<extraJvmArguments>-Xms128m -Xmx3g</extraJvmArguments>
+					<extraJvmArguments>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Xms128m -Xmx3g</extraJvmArguments>
 					<useWildcardClassPath>true</useWildcardClassPath>
 					<repositoryLayout>flat</repositoryLayout>
 					<programs>

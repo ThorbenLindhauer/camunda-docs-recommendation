@@ -21,6 +21,10 @@ public class CamundaDocumentImpl implements CamundaDocument {
   public String getTitle() {
     return sourceDocument.getTitle();
   }
+  
+  public String getType() {
+    return sourceDocument.getType();
+  }
 
   public int getId() {
     return id;
@@ -29,5 +33,5 @@ public class CamundaDocumentImpl implements CamundaDocument {
   public void setId(int id) {
     this.id = id;
   }
-
+  
 }

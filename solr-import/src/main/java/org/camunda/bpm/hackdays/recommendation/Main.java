@@ -10,7 +10,6 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
-import org.camunda.bpm.hackdays.recommendation.clustering.LdaClustering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,12 +80,26 @@ public class Main {
     }
   }
   
+  protected static void listDocuments() {
+    ServiceLoader<SolrDocumentSource> documentSources = ServiceLoader.load(SolrDocumentSource.class);
+    
+    
+    for (SolrDocumentSource documentSource : documentSources) {
+      Iterator<CamundaSourceDocument> it = documentSource.documentsIt();
+      while (it.hasNext()) {
+        CamundaSourceDocument sourceDocument = it.next();
+        LOG.info(sourceDocument.getLink());
+      }
+    }
+  }
+  
   protected static SolrInputDocument solrDocumentFromCamundaDocument(CamundaSourceDocument camundaDocument) {
     SolrInputDocument document = new SolrInputDocument();
     document.addField("id", ID_COUNTER++);
     document.addField("link", camundaDocument.getLink());
     document.addField("text", camundaDocument.getContent());
     document.addField("title", camundaDocument.getTitle());
+    document.addField("type", camundaDocument.getType());
     
     return document;
   }

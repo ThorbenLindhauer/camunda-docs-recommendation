@@ -10,6 +10,7 @@
     <module>clustering-lda</module>
     <module>solr-import</module>
     <module>discourse-import</module>
+    <module>github-import</module>
     <module>solr-import-app</module>
   </modules>
 </project>

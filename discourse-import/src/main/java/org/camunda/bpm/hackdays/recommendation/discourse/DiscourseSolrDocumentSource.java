@@ -123,6 +123,7 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
     try {
       InputStream stream = DiscourseSolrDocumentSource.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
       properties.load(stream);
+      stream.close();
     } catch (Exception e) {
       throw new RuntimeException("could not read properties file", e);
     }
