@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.camunda.bpm.hackdays.recommendation.CamundaSourceDocument;
 import org.camunda.bpm.hackdays.recommendation.SolrDocumentSource;
@@ -17,6 +19,10 @@ public class GithubDocumentSource implements SolrDocumentSource {
   protected static final String REPOSITORIES = "repositories";
   protected static final String FILE_PATTERN = "file-pattern";
   
+  protected static final Pattern REPOSITORY_PART_PATTERN = Pattern.compile("(.*)/(.*)\\[(.*)\\]");
+  
+
+
   protected Properties properties;
   
   public String getName() {
@@ -36,6 +42,7 @@ public class GithubDocumentSource implements SolrDocumentSource {
           properties.getProperty(API_TOKEN),
           repository.getRepositoryOwner(), 
           repository.getRepositoryName(),
+          repository.getRepositoryType(),
           properties.getProperty(FILE_PATTERN)));
     }
     
@@ -79,10 +86,27 @@ public class GithubDocumentSource implements SolrDocumentSource {
     
     String[] repositoryParts = repositoryString.split(",");
     for (String repositoryPart : repositoryParts) {
-      String[] repositoryDetails = repositoryPart.split("/");
-      String repositoryOwner = repositoryDetails[0];
-      String repositoryName = repositoryDetails[1];
-      repositories.add(new CandidateRepository(repositoryOwner, repositoryName));
+      Matcher matcher = REPOSITORY_PART_PATTERN.matcher(repositoryPart);
+      
+      if (!matcher.matches()) {
+        throw new RuntimeException("Could not parse repository configuration; Expecting a"
+            + " comma-separated list of 'owner/name[key=value]'");
+      }
+      
+      String repositoryOwner = matcher.group(1);
+      String repositoryName = matcher.group(2);
+      String metaData = matcher.group(3);
+      
+      String[] metaDataParts = metaData.split(",");
+      String repositoryType = null;
+      for (String metaDataPart : metaDataParts) {
+        String[] metaDataElement = metaDataPart.split("=");
+        if ("type".equals(metaDataElement[0])) {
+          repositoryType = metaDataElement[1];
+        }
+      }
+      
+      repositories.add(new CandidateRepository(repositoryOwner, repositoryName, repositoryType));
     }
     
     return repositories;

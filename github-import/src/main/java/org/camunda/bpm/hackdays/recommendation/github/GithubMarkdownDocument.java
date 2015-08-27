@@ -7,6 +7,7 @@ public class GithubMarkdownDocument implements CamundaSourceDocument {
   protected String link;
   protected String content;
   protected String title;
+  protected String type;
   
   public String getLink() {
     return link;
@@ -33,7 +34,11 @@ public class GithubMarkdownDocument implements CamundaSourceDocument {
   }
   
   public String getType() {
-    return "Example Project";
+    return type;
+  }
+  
+  public void setType(String type) {
+    this.type = type;
   }
 
 }
