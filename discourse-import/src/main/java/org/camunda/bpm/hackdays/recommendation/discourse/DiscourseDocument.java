@@ -1,10 +1,10 @@
 package org.camunda.bpm.hackdays.recommendation.discourse;
 
-import org.camunda.bpm.hackdays.recommendation.CamundaDocument;
+import org.camunda.bpm.hackdays.recommendation.CamundaSourceDocument;
 import org.camunda.bpm.hackdays.recommendation.discourse.domain.DiscoursePost;
 import org.camunda.bpm.hackdays.recommendation.discourse.domain.DiscourseThread;
 
-public class DiscourseDocument implements CamundaDocument {
+public class DiscourseDocument implements CamundaSourceDocument {
 
   public static final String DISCOURSE_HOST = "host";
   

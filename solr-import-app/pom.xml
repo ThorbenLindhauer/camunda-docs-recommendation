@@ -17,12 +17,18 @@
 			<artifactId>discourse-import</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
-	      <groupId>ch.qos.logback</groupId>
-	      <artifactId>logback-classic</artifactId>
-	      <version>1.1.2</version>
-	    </dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.7</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -32,7 +38,7 @@
 				<artifactId>appassembler-maven-plugin</artifactId>
 				<version>1.10</version>
 				<configuration>
-				    <extraJvmArguments>-Xms128m -Xmx3g</extraJvmArguments>
+					<extraJvmArguments>-Xms128m -Xmx3g</extraJvmArguments>
 					<useWildcardClassPath>true</useWildcardClassPath>
 					<repositoryLayout>flat</repositoryLayout>
 					<programs>

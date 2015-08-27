@@ -6,5 +6,5 @@ public interface SolrDocumentSource {
 
   String getName();
   
-  Iterator<CamundaDocument> documentsIt();
+  Iterator<CamundaSourceDocument> documentsIt();
 }

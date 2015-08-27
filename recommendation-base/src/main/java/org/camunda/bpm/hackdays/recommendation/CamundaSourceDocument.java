@@ -1,6 +1,6 @@
 package org.camunda.bpm.hackdays.recommendation;
 
-public interface CamundaDocument {
+public interface CamundaSourceDocument {
 
   String getLink();
   

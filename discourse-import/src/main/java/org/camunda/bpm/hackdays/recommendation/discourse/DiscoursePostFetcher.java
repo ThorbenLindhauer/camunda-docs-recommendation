@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -73,6 +74,11 @@ public class DiscoursePostFetcher {
     
     protected void move() {
       boolean threadLoaded = false;
+      
+      if (currentSequence >= sequenceEnd) {
+        throw new NoSuchElementException();
+      }
+      
       while (!threadLoaded && currentSequence < sequenceEnd) {
         try {
           currentSequence++;

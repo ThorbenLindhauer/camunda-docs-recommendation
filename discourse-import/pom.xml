@@ -30,9 +30,8 @@
 
 		<dependency>
 			<groupId>org.camunda.bpm.hackdays.recommendation</groupId>
-			<artifactId>solr-import</artifactId>
+			<artifactId>recommendation-base</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>

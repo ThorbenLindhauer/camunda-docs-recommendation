@@ -10,6 +10,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
+import org.camunda.bpm.hackdays.recommendation.clustering.LdaClustering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,9 @@ public class Main {
   public static final Logger LOG = LoggerFactory.getLogger(Main.class);
   
   public static final int DOC_CACHE_SIZE = 100;
+  
+  // TODO: make configurable
+  public static final int NUM_TOPICS = 20;
   
   public static int ID_COUNTER = 0;
   
@@ -50,7 +54,7 @@ public class Main {
       LOG.info("Processing source " + documentSource.getName());
       
       
-      Iterator<CamundaDocument> documents = documentSource.documentsIt();
+      Iterator<CamundaSourceDocument> documents = documentSource.documentsIt();
       
       List<SolrInputDocument> cachedDocuments = new ArrayList<SolrInputDocument>();
       try {
@@ -77,7 +81,7 @@ public class Main {
     }
   }
   
-  protected static SolrInputDocument solrDocumentFromCamundaDocument(CamundaDocument camundaDocument) {
+  protected static SolrInputDocument solrDocumentFromCamundaDocument(CamundaSourceDocument camundaDocument) {
     SolrInputDocument document = new SolrInputDocument();
     document.addField("id", ID_COUNTER++);
     document.addField("link", camundaDocument.getLink());
@@ -85,6 +89,53 @@ public class Main {
     document.addField("title", camundaDocument.getTitle());
     
     return document;
+  }
+  
+  public static class JoiningIterator implements Iterator<CamundaDocument> {
+
+    protected Iterator<SolrDocumentSource> documentSources;
+    
+    protected Iterator<CamundaSourceDocument> currentIterator;
+    protected CamundaSourceDocument nextSourceDocument;
+    protected int idCounter = 0;
+    
+    public JoiningIterator(Iterator<SolrDocumentSource> documentSources) {
+      this.documentSources = documentSources;
+      move();
+    }
+    
+    public boolean hasNext() {
+      return nextSourceDocument != null;
+    }
+
+    public CamundaDocument next() {
+      LOG.info("next document " + idCounter);
+      CamundaDocumentImpl currentDocument = new CamundaDocumentImpl(idCounter++, nextSourceDocument);
+      move();
+      return currentDocument;
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+    
+    protected void move() {
+      if (currentIterator == null || !currentIterator.hasNext()) {
+        if (documentSources.hasNext()) {
+          currentIterator = documentSources.next().documentsIt();
+          move();
+        }
+        else {
+          nextSourceDocument = null;
+          currentIterator = null;
+        }
+      }
+      else {
+        nextSourceDocument = currentIterator.next();
+      }
+      
+    }
+    
   }
   
 

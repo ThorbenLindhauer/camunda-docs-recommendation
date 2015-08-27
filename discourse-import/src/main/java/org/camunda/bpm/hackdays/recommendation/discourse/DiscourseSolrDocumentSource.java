@@ -2,12 +2,13 @@ package org.camunda.bpm.hackdays.recommendation.discourse;
 
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.camunda.bpm.hackdays.recommendation.CamundaDocument;
+import org.camunda.bpm.hackdays.recommendation.CamundaSourceDocument;
 import org.camunda.bpm.hackdays.recommendation.SolrDocumentSource;
 import org.camunda.bpm.hackdays.recommendation.discourse.domain.DiscoursePost;
 import org.camunda.bpm.hackdays.recommendation.discourse.domain.DiscourseThread;
@@ -33,15 +34,15 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
     return "discourse";
   }
 
-  public Iterator<CamundaDocument> documentsIt() {
+  public Iterator<CamundaSourceDocument> documentsIt() {
     return new DiscourseSolrDocumentIterator(properties);
   }
   
-  public static class DiscourseSolrDocumentIterator implements Iterator<CamundaDocument> {
+  public static class DiscourseSolrDocumentIterator implements Iterator<CamundaSourceDocument> {
     
     protected DiscoursePostFetcher fetcher;
     protected Properties properties;
-    protected CamundaDocument nextDocument;
+    protected CamundaSourceDocument nextDocument;
     protected Iterator<DiscourseThread> threadIt;
     
     public DiscourseSolrDocumentIterator(Properties properties) {
@@ -68,8 +69,13 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
       return nextDocument != null;
     }
 
-    public CamundaDocument next() {
-      CamundaDocument returnDocument = nextDocument;
+    public CamundaSourceDocument next() {
+      if (nextDocument == null) {
+        throw new NoSuchElementException();
+      }
+      CamundaSourceDocument returnDocument = nextDocument;
+        
+      
       move();
       return returnDocument;
     }
@@ -79,18 +85,24 @@ public class DiscourseSolrDocumentSource implements SolrDocumentSource {
     }
     
     protected void move() {
-      DiscourseThread nextThread = threadIt.next();
       
-      while (nextThread.isDeleted() && threadIt.hasNext()) {
-        nextThread = threadIt.next();
-      }
-      
-      if (!nextThread.isDeleted()) {
-        nextDocument = new DiscourseDocument(properties.getProperty(DISCOURSE_HOST), nextThread);
+      if (threadIt.hasNext()) {
+        DiscourseThread nextThread = threadIt.next();
+        
+        while (nextThread.isDeleted() && threadIt.hasNext()) {
+          nextThread = threadIt.next();
+        }
+        if (!nextThread.isDeleted()) {
+          nextDocument = new DiscourseDocument(properties.getProperty(DISCOURSE_HOST), nextThread);
+        }
+        else {
+          nextDocument = null;
+        }
       }
       else {
         nextDocument = null;
       }
+      
     }
     
     protected String concatenatePosts(DiscourseThread thread) {

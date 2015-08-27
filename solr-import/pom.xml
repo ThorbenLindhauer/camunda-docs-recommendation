@@ -16,10 +16,22 @@
 			<version>${version.solr}</version>
 		</dependency>
 		
+		<dependency>
+			<groupId>org.camunda.bpm.hackdays.recommendation</groupId>
+			<artifactId>recommendation-base</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 	    <dependency>
 	      <groupId>org.slf4j</groupId>
 	      <artifactId>slf4j-api</artifactId>
 	      <version>1.7.7</version>
+	    </dependency>
+	    
+	    <dependency>
+	    	<groupId>org.camunda.bpm.hackdays.recommendation</groupId>
+			<artifactId>clustering-lda</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 	    </dependency>
 	</dependencies>
 </project>

@@ -2,7 +2,7 @@ package org.camunda.bpm.hackdays.recommendation.discourse;
 
 import java.util.Iterator;
 
-import org.apache.solr.common.SolrInputDocument;
+import org.camunda.bpm.hackdays.recommendation.CamundaSourceDocument;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,12 +13,12 @@ public class FetchPostsTest {
     
     DiscourseSolrDocumentSource documentSource = new DiscourseSolrDocumentSource();
     
-    Iterator<SolrInputDocument> documentsIt = documentSource.documentsIt();
+    Iterator<CamundaSourceDocument> documentsIt = documentSource.documentsIt();
     
     while (documentsIt.hasNext()) {
-      SolrInputDocument document = documentsIt.next();
-      Assert.assertTrue(document.getField("text").getValue() instanceof String);
-      System.out.println(document.getField("link"));
+      CamundaSourceDocument document = documentsIt.next();
+      Assert.assertTrue(document.getContent() != null);
+      System.out.println(document.getLink());
     }
   }
 }
