@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<schema name="example" version="1.5">
+  <field name="_version_" type="long" indexed="true" stored="true"/>
+  <field name="_root_" type="string" indexed="true" stored="false"/>
+  <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+
+  <field name="link" type="string" indexed="true" stored="true"/>
+  <field name="text" type="text_en" indexed="true" stored="true"/>
+  <field name="title" type="text_en" indexed="true" stored="true"/>
+  <field name="type" type="text_en" indexed="true" stored="true"/>
+
+
+  <!-- Field to use to determine and enforce document uniqueness.
+    Unless this field is marked with required="false", it will be a required field
+    -->
+  <uniqueKey>id</uniqueKey>
+
+  <!-- The StrField type is not analyzed, but indexed/stored verbatim.
+    It supports doc values but in that case the field needs to be
+    single-valued and either required or have a default value.
+    -->
+  <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+  <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+
+  <!-- A text field with defaults appropriate for English: it
+       tokenizes with StandardTokenizer, removes English stop words
+       (lang/stopwords_en.txt), down cases, protects words from protwords.txt, and
+       finally applies Porter's stemming.  The query time analyzer
+       also applies synonyms from synonyms.txt. -->
+  <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
+    <analyzer type="index">
+      <!-- remove html elements -->
+      <charFilter class="solr.HTMLStripCharFilterFactory"/>
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <!-- in this example, we will only use synonyms at query time
+      <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+      -->
+      <!-- Case insensitive stop word removal.
+      -->
+      <filter class="solr.StopFilterFactory"
+              ignoreCase="true"
+              words="lang/stopwords_en.txt"
+              />
+      <filter class="solr.LowerCaseFilterFactory"/>
+<filter class="solr.EnglishPossessiveFilterFactory"/>
+      <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+<!-- Optionally you may want to use this less aggressive stemmer instead of PorterStemFilterFactory:
+      <filter class="solr.EnglishMinimalStemFilterFactory"/>
+-->
+      <filter class="solr.PorterStemFilterFactory"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+      <filter class="solr.StopFilterFactory"
+              ignoreCase="true"
+              words="lang/stopwords_en.txt"
+              />
+      <filter class="solr.LowerCaseFilterFactory"/>
+<filter class="solr.EnglishPossessiveFilterFactory"/>
+      <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+<!-- Optionally you may want to use this less aggressive stemmer instead of PorterStemFilterFactory:
+      <filter class="solr.EnglishMinimalStemFilterFactory"/>
+-->
+      <filter class="solr.PorterStemFilterFactory"/>
+    </analyzer>
+  </fieldType>
+
+  <!-- Similarity is the scoring routine for each document vs. a query.
+       A custom Similarity or SimilarityFactory may be specified here, but
+       the default is fine for most applications.
+       For more info: http://wiki.apache.org/solr/SchemaXml#Similarity
+    -->
+  <!--
+     <similarity class="com.example.solr.CustomSimilarityFactory">
+       <str name="paramkey">param value</str>
+     </similarity>
+    -->
+
+</schema>
